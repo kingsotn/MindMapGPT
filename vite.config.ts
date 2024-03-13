@@ -6,15 +6,15 @@ import manifest from "./manifest.json";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    svgr({
-      svgrOptions: {
-        icon: true,
-        // ...svgr options (https://react-svgr.com/docs/options/)
-      },
-    }),
-    // Build Chrome Extension
-    crx({ manifest }),
-  ],
+    plugins: [
+        react(),
+        svgr({
+            svgrOptions: {
+                icon: true,
+                // ...svgr options (https://react-svgr.com/docs/options/)
+            },
+        }),
+        // Build Chrome Extension
+        crx({ manifest }),
+    ],
 });
