@@ -79,10 +79,6 @@ now bundling the webpack
 
 -   [x] never mind i just copied a github lib and got react to work both as a popup and as a webpage
 
--   [x] fixed a bunch of styling errors with window resizing. and radix components to load.
-
-- [ ] play around with reactflow
-
 -   [ ] class Node() and its properties (look for obsidian for inspiration)
 
     -   [ ] create
@@ -103,19 +99,8 @@ now bundling the webpack
 
 3. Landing site, definitely (look at levels fyi or simplify.jobs)
 
-4. actually create websites cached somewhere of the mindmaps
-
 ## Thoughts:
 
 This is a tool that I want to build, and it doesn’t address a need in the market. It can be demotivating to think that while others are marketing their cool startups, I’m making a tool with an undesired need. I think it is a mistake for someone to build their company around an artificial problem — sometimes the easy ideas are the most overlooked ones. I don’t need another B2B SaaS product for my cloud AI inference engine, or a super niche service; I want an AI that can order food for me end to end. Just the simple things. And I think
 
 The reason why I have decided to build this is not for the money (and not partly for some Twitter clout), but to also put my skills to the test.
-
-# links
-https://observablehq.com/@d3/gallery?utm_source=d3js-org&utm_medium=hero&utm_campaign=try-observable ok this is more for vis as well
-
-https://reactflow.dev/examples this one good, pretty
-
-https://github.com/jacomyal/sigma.js https://www.sigmajs.org/ not this one, too static
-
-# ideas
