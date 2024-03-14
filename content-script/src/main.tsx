@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "./main.css";
 import App from "./App";
+import ConversationObserver from "./ConversationObserver";
 
 // Create a new div element for the React app if it doesn't already exist
 const appRootId = "react-app-root";
@@ -17,6 +18,7 @@ if (appRootElem) {
     const root = createRoot(appRootElem);
     root.render(
         <React.StrictMode>
+            <ConversationObserver />
             <App />
         </React.StrictMode>,
     );

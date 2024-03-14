@@ -2,10 +2,13 @@ import Logo from "./Logo";
 import React, { useEffect, useState } from "react";
 import ToggleGroupDemo from "./ToggleGroup";
 import "./App.css";
+import CustomNodeFlow from "./Nodes";
+import ConversationObserver from "./ConversationObserver";
 
 function App() {
 	const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
 	const [showApp, setShowApp] = useState<boolean>(false);
+	const [appWidth, setAppWidth] = useState<number>(window.innerWidth * 0.25)
 
 	useEffect(() => {
 		const checkLeftNavAndAdjust = (): void => {
@@ -17,14 +20,18 @@ function App() {
 			setShowApp(!!leftNav);
 			if (!!chatBody) {
 				if (leftNav) {
-					const appWidth = window.innerWidth * 0.25;
+					setAppWidth(window.innerWidth * 0.25);
 					chatBody.style.marginRight = `${appWidth}px`;
 					chatBody.style.width = `calc(100% - ${appWidth}px)`;
 				} else {
+					setAppWidth(0);
 					chatBody.style.marginRight = `${0}px`;
 					chatBody.style.width = "unset";
 				}
 			}
+
+			// console.log(`appWidth: ${appWidth}`);
+			// console.log(`windowWidth: ${windowWidth}`);
 		};
 
 		const handleResize = (): void => {
@@ -60,6 +67,8 @@ function App() {
 					<ToggleGroupDemo />
 					<Logo className="App-logo" id="App-logo" title="React logo" />
 					<p className="App-title"> Flow: A mind map for ChatGPT</p>
+
+					{/* <CustomNodeFlow appWidth={appWidth} /> */}
 				</header>
 			</div>
 		</div>
