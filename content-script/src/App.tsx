@@ -1,51 +1,63 @@
 import Logo from "./Logo";
-import React, { useEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import ToggleGroupDemo from "./ToggleGroup";
 import "./App.css";
-import CustomNodeFlow from "./Nodes";
-import ConversationObserver from "./ConversationObserver";
+
+import { useSession } from "./SessionProvider";
+
+
+// TODO sessionId is a useState to fix the window sizing
 
 function App() {
-	const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
+	const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth * 0.75);
 	const [showApp, setShowApp] = useState<boolean>(false);
 	const [appWidth, setAppWidth] = useState<number>(window.innerWidth * 0.25)
+	const { sessionId } = useSession();
 
-	useEffect(() => {
-		const checkLeftNavAndAdjust = (): void => {
 
+	useLayoutEffect(() => {
+		const checkLeftNavAndAdjust = () => {
 			const leftNav: HTMLDivElement | null = document.querySelector("#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary");
-			const chatBody: HTMLDivElement | null = document.querySelector("#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.flex.h-full.flex-col");
 
-			// Update visibility based on the existence of leftNav
-			setShowApp(!!leftNav);
-			if (!!chatBody) {
-				if (leftNav) {
-					setAppWidth(window.innerWidth * 0.25);
-					chatBody.style.marginRight = `${appWidth}px`;
-					chatBody.style.width = `calc(100% - ${appWidth}px)`;
-				} else {
-					setAppWidth(0);
-					chatBody.style.marginRight = `${0}px`;
-					chatBody.style.width = "unset";
+			// Start polling for chatBody
+			const intervalId = setInterval(() => {
+				const chatBody: HTMLDivElement | null = document.querySelector("#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.flex.h-full.flex-col");
+
+				if (!!chatBody) {
+					clearInterval(intervalId); // Stop polling once chatBody is found
+
+					// Determine the new app width based on the existence of leftNav
+					const newAppWidth = leftNav ? window.innerWidth * 0.25 : 0;
+
+					// Update visibility based on the existence of leftNav
+					setShowApp(!!leftNav);
+
+					// Apply styles to chatBody
+					chatBody.style.marginRight = `${newAppWidth}px`;
+					chatBody.style.width = leftNav ? `calc(100% - ${newAppWidth}px)` : "unset";
+
+					// Now, update the state with the new width for future use
+					setAppWidth(newAppWidth);
 				}
-			}
+			}, 100); // Check every 100 milliseconds
 
-			// console.log(`appWidth: ${appWidth}`);
-			// console.log(`windowWidth: ${windowWidth}`);
+			return intervalId;
 		};
 
-		const handleResize = (): void => {
+		const intervalId = checkLeftNavAndAdjust();
+
+		const handleResize = () => {
 			setWindowWidth(window.innerWidth);
 			checkLeftNavAndAdjust();
 		};
 
 		window.addEventListener("resize", handleResize);
-		checkLeftNavAndAdjust(); // Initial check and adjustment
 
-		return (): void => {
+		return () => {
+			clearInterval(intervalId); // Ensure to clear the interval on cleanup
 			window.removeEventListener("resize", handleResize);
 		};
-	}, [windowWidth]); // The dependency on windowWidth ensures the effect runs on resize
+	}, [windowWidth, sessionId]); // Dependencies
 
 	if (!showApp) {
 		return null; // Or return an alternative UI

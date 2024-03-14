@@ -79,6 +79,19 @@ now bundling the webpack
 
 -   [x] never mind i just copied a github lib and got react to work both as a popup and as a webpage
 
+Thur Mar 14:
+
+- [x] implemented a MutationObserver for Dom Elements
+- sessionId for each chats (saved as a useState var)
+- Mutation Observer now listens for mutations in the dom (as in new elements appended), and then identifies them as either user Input (even), chat Output (odd)
+- okay fixed the mutation observer using sessionId saved states. but I used a very inelegant way of listening constantly with interval
+
+- okay now working on ChatNode() backend, then frontend
+
+- [ ] more things needed to check: see if we can grab the network sources for more metadata
+- [ ] update states of the chat data required for the UI
+- [ ] do the UI for the node creation, and fix the UI!
+
 -   [ ] class Node() and its properties (look for obsidian for inspiration)
 
     -   [ ] create

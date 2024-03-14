@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./main.css";
 import App from "./App";
 import ConversationObserver from "./ConversationObserver";
+import { SessionProvider } from "./SessionProvider";
 
 // Create a new div element for the React app if it doesn't already exist
 const appRootId = "react-app-root";
@@ -18,8 +19,11 @@ if (appRootElem) {
     const root = createRoot(appRootElem);
     root.render(
         <React.StrictMode>
-            <ConversationObserver />
-            <App />
+            {/* session provider wrapped to provide sessionId context */}
+            <SessionProvider>
+                <ConversationObserver />
+                <App />
+            </SessionProvider>
         </React.StrictMode>,
     );
 } else {
