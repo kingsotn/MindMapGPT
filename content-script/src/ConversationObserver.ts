@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, createContext, useContext } from 'react';
 import { useSession } from './SessionProvider';
+import { parse } from 'path';
 
 const ConversationObserver: React.FC<{}> = () => {
     const { sessionId } = useSession();
@@ -16,6 +17,24 @@ const ConversationObserver: React.FC<{}> = () => {
             const match = dataTestId?.match(/conversation-turn-(\d+)/);
             return match ? parseInt(match[1], 10) : null;
         };
+
+        const parseChatDom = (turnNumber: number, messageDiv: Element) => {
+            if (!messageDiv) return "div is null";
+
+            const uuid = messageDiv.querySelector('[data-message-id]')?.getAttribute('data-message-id');
+            const conversationTurnString = messageDiv.closest('[data-testid]')?.getAttribute('data-testid');
+            const conversationTurn = conversationTurnString
+                ? parseInt(conversationTurnString.match(/\d+$/)?.[0] ?? '0', 10)
+                : null;
+
+            let content =
+                messageDiv.querySelector('[data-message-author-role="assistant"][data-message-id="17700b54-fa5a-46da-8caf-8dc71f7fe8e3"] .markdown p') ||
+                messageDiv.querySelector('.markdown')?.textContent ||
+                '';
+
+            const role = isEven(turnNumber) ? "User" : 'Assistant';
+            return { uuid, conversationTurn, role, content };
+        }
 
         const isEven = (num: number): boolean => num % 2 === 0;
 
@@ -42,8 +61,12 @@ const ConversationObserver: React.FC<{}> = () => {
                                     ) {
                                         const turnNumber = getTurnNumber(textElement as Element);
                                         if (turnNumber !== null) {
-                                            console.log(`A new conversation turn was added: ${turnNumber % 2 === 0 ? 'Chat Response' : 'User Query'}`, textElement);
-                                            // Additional logic based on turnNumber's parity
+                                            console.log(`A new conversation turn was added: ${isEven(turnNumber) ? 'Assistant' : 'User'}`, textElement);
+                                            // TODO: Additional logic based on turnNumber's parity
+
+                                            // parse the dom, put those params into addChatNode()
+                                            const out = parseChatDom(turnNumber, textElement);
+                                            console.log(out);
 
                                             // call createChatNode()
                                         }

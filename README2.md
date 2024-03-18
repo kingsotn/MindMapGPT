@@ -86,7 +86,37 @@ Thur Mar 14:
 - Mutation Observer now listens for mutations in the dom (as in new elements appended), and then identifies them as either user Input (even), chat Output (odd)
 - okay fixed the mutation observer using sessionId saved states. but I used a very inelegant way of listening constantly with interval
 
+Sat Mar 16:
 - okay now working on ChatNode() backend, then frontend
+- ok dope uuids in each chat. can't use conversation-turn as a unique identifier, but that's a good way to get the branching divs! dope
+- drew a diagram of what I know so far ab my app
+- fuck dude after drawing my diagram i shouldve coded the backend listeners/observers in python or go or smth... react is such a pain if there is no need to render anything and saving states
+
+Sunday Mar 17:
+- ok nvm i created the addChatNode and finalized the basic properties of the MindMap
+- I also just realized that i can't just query the DOM for the text because it is streamed back to me... going to see if i can create a listener queue that can stream the dom back to me by listening to that DOM? but that's kind of annoying i'm not sure if it would work, or I can just wait till execution finishes
+
+- ok i fished through the network responses:
+    1. was able to find conversations metadata `https://chat.openai.com/backend-api/conversations?offset=0&limit=28&order=updated`
+    2. all data from the chat `https://chat.openai.com/backend-api/conversation/9331e069-b93b-4eeb-9ca6-af23bd87a146`, just look up the id in the network tab
+        - i thought i fucked up and shouldn't have touched the dom but it seems like these aren't sorted? so i can still use the dom, or sort the conversations via metadata too
+        - points to `children` node, has `status`
+
+
+        !!!!
+        - ok there's a fuckton of data here. wonder if i could just continually listen to all this data and store it somewhere too, user data is super important these days. can store into some larger vector database and do some stuff with this data
+        !!!!
+
+        - ok i also found out that the data is a doubly linked list. Dummy <-> System <-> Chats[]... I should implement the same structure
+        - now what to do with my dom code...
+        - i figured out you can curl the same network request that ChatGPT queries to create the data. but idk how to do that without the user's (other than myself's) bearer tokens and a bunch of other stuff. This is actually a more complicated oauth process that would require my app to query on behalf of the user... i know how to build that but i dont' know if that's necessary. ChatGPT renders the entire DOM messages, but I would need to manually connect them which could take a lot of time for large conversation lengths (>100 convos) if I want to always dynamically build the tree. I could cache the MindMap so I only need to build it once... but this data seems so good..... seems like chatgpt doesn't support oauth for now other than in the GPT plugins. Also idk how to get the bearer tokens and a bunch of other headers by intercepting the network panel or causing suspicion for my users. so i guess its back to the DOM.
+
+        - ok guess i'll continue with the same DOM stuff. content can pass for now, i'll figure out that later
+
+
+
+
+
 
 - [ ] more things needed to check: see if we can grab the network sources for more metadata
 - [ ] update states of the chat data required for the UI
