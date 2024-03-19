@@ -6,7 +6,7 @@ import MindMapProvider, { useMindMap, ChatNode, ChatNodePair } from './MindMapPr
 const ConversationObserver: React.FC<{}> = () => {
     const { sessionId } = useSession();
     const observerRef = useRef<MutationObserver | null>(null);
-    const { addChatNode } = useMindMap();
+    const { addChatNodePair } = useMindMap();
 
     useEffect(() => {
         const isElementNode = (node: Node): node is HTMLElement => node.nodeType === Node.ELEMENT_NODE;
@@ -20,7 +20,7 @@ const ConversationObserver: React.FC<{}> = () => {
             return match ? parseInt(match[1], 10) : null;
         };
 
-        const parseChatDomToNode = (turnNumber: number, messageDiv: Element): ChatNode => {
+        const parseDomToChatNode = (turnNumber: number, messageDiv: Element): ChatNode => {
             // console.log("parsing")
             if (!messageDiv) throw "div is null";
 
@@ -29,24 +29,29 @@ const ConversationObserver: React.FC<{}> = () => {
             const conversationTurn = conversationTurnString
                 ? parseInt(conversationTurnString.match(/\d+$/)?.[0] ?? '0', 10)
                 : null;
-
             let content =
                 messageDiv.querySelector('[data-message-author-role="assistant"][data-message-id="17700b54-fa5a-46da-8caf-8dc71f7fe8e3"] .markdown p') ||
                 messageDiv.querySelector('.markdown')?.textContent ||
                 '';
 
-            // const role = isEven(turnNumber) ? "User" : 'Assistant';
-            // console.log(`${role}: `, uuid, conversationTurn, role, content);
-            // console.log("returning")
-            console.log(`A new conversation turn was added: ${isEven(turnNumber) ? 'Assistant' : 'User'}`);
-            console.log(uuid, conversationTurn, isEven(turnNumber) ? "User" : "Assistant", content)
+            if (uuid === undefined || uuid === null) {
+                throw new Error('UUID is null or undefined');
+            }
 
+            if (conversationTurnString === null) {
+                throw new Error('conversationTurnString is null');
+            }
+
+            if (content === null) {
+                throw new Error('Content is null');
+            }
+
+            console.log(isEven(turnNumber) ? "Assistant" : "User", uuid.slice(-14), conversationTurn, content);
             return {
-                uuid: uuid || '', // Make sure you have a valid UUID or handle this accordingly
+                uuid: uuid || '',
                 conversationTurn: conversationTurn || 0,
                 role: isEven(turnNumber) ? "User" : "Assistant",
                 content: content as string, // Ensure this is a string or handled accordingly
-                children: new Map(), // Initialize an empty Map for children
             };
         }
 
@@ -74,10 +79,24 @@ const ConversationObserver: React.FC<{}> = () => {
 
                 const callback = (mutationsList: MutationRecord[]) => {
                     let chatNodePair: ChatNodePair = {
+                        uuid: "",
                         userNode: {} as ChatNode,
-                        assistantNode: {} as ChatNode
+                        assistantNode: {} as ChatNode,
+                        children: new Map<string, ChatNodePair>
                     };
-                    handleMutations(mutationsList, chatNodePair);
+
+                    // Filter mutations for Assistant and User Chats
+                    const relevantMutations = mutationsList.filter(mutation =>
+                        mutation.type === 'childList' &&
+                        mutation.addedNodes.length > 0 &&
+                        mutation.target instanceof Element &&
+                        mutation.target.querySelector('.flex-col.gap-1.md\\:gap-3')
+                    );
+
+                    // Only call handleMutations if there are relevant mutations
+                    if (relevantMutations.length > 0) {
+                        handleMutations(relevantMutations, chatNodePair);
+                    }
                 };
 
                 observerRef.current = new MutationObserver(callback);
@@ -85,36 +104,43 @@ const ConversationObserver: React.FC<{}> = () => {
             });
         };
 
-
         const handleMutations = (mutationsList: MutationRecord[], chatNodePair: ChatNodePair) => {
-            // console.log("len:", mutationsList.length)
-            // console.log("mutations:", mutationsList)
-            for (const mutation of mutationsList) {
-                if (mutation.type === 'childList' && mutation.addedNodes.length > 0 && mutation.target instanceof Element && mutation.target.querySelector('.flex-col.gap-1.md\\:gap-3')) {
-                    mutation.addedNodes.forEach((textElement) => {
-                        if (
-                            isElementNode(textElement) &&
-                            hasRequiredClasses(textElement as Element) &&
-                            (textElement as Element).hasAttribute('data-testid')
-                        ) {
-                            const turnNumber = getTurnNumber(textElement as Element);
-                            if (turnNumber !== null) {
+            // Flag to check if chatNodePair is updated to decide on calling addChatNodePair
+            let isChatNodePairUpdated = false;
 
-                                // Parse the DOM and create a new ChatNode
-                                const chatNodeParsed = parseChatDomToNode(turnNumber, textElement);
+            mutationsList.forEach(mutation => {
+                mutation.addedNodes.forEach((textElement) => {
+                    if (
+                        isElementNode(textElement) &&
+                        hasRequiredClasses(textElement as Element) &&
+                        (textElement as Element).hasAttribute('data-testid')
+                    ) {
+                        const turnNumber = getTurnNumber(textElement as Element);
+                        if (turnNumber !== null) {
+                            // Parse the DOM node to create a ChatNode
+                            const chatNodeParsed = parseDomToChatNode(turnNumber, textElement);
 
-                                // Assign the parsed node to the appropriate property of chatNodePair using a ternary operator
-                                isEven(turnNumber)
-                                    ? (chatNodePair.assistantNode = chatNodeParsed)
-                                    : (chatNodePair.userNode = chatNodeParsed);
+                            // Update the chatNodePair based on the turn number
+                            if (isEven(turnNumber)) {
+                                chatNodePair.assistantNode = chatNodeParsed;
+                            } else {
+                                chatNodePair.userNode = chatNodeParsed;
+                                chatNodePair.uuid = chatNodeParsed.uuid; // Assuming UUID is updated for user nodes
                             }
+
+                            isChatNodePairUpdated = true;
                         }
-                        console.log("chatNodePair:", chatNodePair);
-                    });
-                }
+                    }
+                });
+            });
+
+            // If chatNodePair was updated, add it to the MindMap
+            if (isChatNodePairUpdated) {
+                addChatNodePair(chatNodePair);
+                console.log("chatNodePair added:", chatNodePair);
             }
-            // At this point, chatNodePair will contain both userNode and assistantNode
         };
+
 
         setupObserver();
 

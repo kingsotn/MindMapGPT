@@ -4,8 +4,8 @@ import "./main.css";
 import App from "./App";
 import ConversationObserver from "./ConversationObserver";
 import { SessionProvider } from "./SessionProvider";
+import MindMapProvider from "./MindMapProvider";
 
-// Create a new div element for the React app if it doesn't already exist
 const appRootId = "react-app-root";
 let appRootElem = document.getElementById(appRootId);
 if (!appRootElem) {
@@ -14,15 +14,17 @@ if (!appRootElem) {
     document.body.appendChild(appRootElem);
 }
 
-// Ensure TypeScript knows the element exists
 if (appRootElem) {
     const root = createRoot(appRootElem);
     root.render(
         <React.StrictMode>
-            {/* session provider wrapped to provide sessionId context */}
             <SessionProvider>
-                <ConversationObserver />
-                <App />
+                {/* Nest MindMapProvider inside SessionProvider */}
+                <MindMapProvider>
+                    {/* Components that use MindMap context should be here */}
+                    <ConversationObserver />
+                    <App />
+                </MindMapProvider>
             </SessionProvider>
         </React.StrictMode>,
     );
