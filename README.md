@@ -1,5 +1,7 @@
 # FLOW
 
+Sam Altman said that chatgpt is a (brainstorming tool)[https://youtu.be/jvqFAi7vkBc?si=W-Guv57vhzGdO4yc&t=3140]. Let's make it a great workflow start
+
 ## Run
 
 ```

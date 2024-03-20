@@ -5,6 +5,8 @@ import "./App.css";
 
 import { useSession } from "./SessionProvider";
 
+import OverviewFlow from "./OverviewFlow";
+
 
 // TODO sessionId is a useState to fix the window sizing
 
@@ -75,15 +77,16 @@ function App() {
 	return (
 		<div style={appStyle}>
 			<div className="App">
-				<header className="App-header">
-					<ToggleGroupDemo />
+				<header className="App-header" style={{ height: '100vh', width: '100%' }}>
+					<OverviewFlow />
+					{/* <ToggleGroupDemo />
 					<Logo className="App-logo" id="App-logo" title="React logo" />
-					<p className="App-title"> Flow: A mind map for ChatGPT</p>
+					<p className="App-title"> Flow: A mind map for ChatGPT</p> */}
 
 					{/* <CustomNodeFlow appWidth={appWidth} /> */}
 				</header>
 			</div>
-		</div>
+		</div >
 	);
 }
 

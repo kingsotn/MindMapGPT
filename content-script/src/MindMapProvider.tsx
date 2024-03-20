@@ -1,11 +1,12 @@
 // ChatNodeContext.tsx
 
-// file contains all the backend properties of ChatNode
-
-// Context allows us to wrap all the functions of ChatNode that can be accessed in other components
+// Role: Serves as the context provider of MindMap. It manages the state of the mind map (e.g., nodes and lastNodeOnDom) and provides functions to modify this state (e.g., addChatNodePair).
+// State Management: Uses refs or state hooks (e.g., useState, useRef) to keep track of the current state. When the state updates, it should provide the new state to through the context.
+// UI Updates Trigger: When addChatNodePair is called, and a new node is successfully added, it updates the mind map's state. This change in state (or refs, if you're using them to track mutable data without causing re-renders) should be propagated through the context to any consuming components.
 
 import React, { createContext, useContext, useState, useRef } from 'react';
 import { useSession } from './SessionProvider';
+// import { updateMindMapUI } from './ReactFlowUI';
 
 
 type Role = "User" | "Assistant" | "System";
@@ -45,23 +46,20 @@ const defaultHead: ChatNodePair = {
 // Assign defaultHead as the parent of defaultSystem
 defaultSystem.parent = defaultHead;
 
-
 // Default context value incorporating the head root
 const defaultMindMapContextValue = {
     sessionId: '', // Assuming an empty string or some initial value
-    // nodes: new Map([[defaultSystem.uuid, defaultSystem]]),
+    nodes: new Map([[defaultSystem.uuid, defaultSystem]]),
     addChatNodePair: (node: ChatNodePair) => { }, // Stub function, since we can't add nodes without the provider
-    // lastNodeOnDom: defaultSystem,
+    lastNodeOnDom: defaultSystem,
 };
 
 // Creating the context with the default value
 const MindMapContext = createContext(defaultMindMapContextValue);
 
-
 const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { sessionId } = useSession();
     const nodes = useRef<Map<string, ChatNodePair>>(new Map([[defaultHead.uuid, defaultHead], [defaultSystem.uuid, defaultSystem]]));
-    // const [lastNodeOnDom, setLastNodeOnDom] = useState<ChatNodePair>(defaultSystem); //this is the last ChatNodePair of the MindMap shown on DOM
     const lastNodeOnDomRef = useRef<ChatNodePair>(defaultSystem);
 
 
@@ -90,6 +88,9 @@ const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         console.log("lastNodeOnDom", lastNodeOnDomRef.current.uuid.slice(-14));
 
         console.log(`MindMap (${sessionId}):`);
+
+        // update the UI
+        // updateMindMapUI();
     };
 
     const printMindMap = () => {
@@ -97,7 +98,7 @@ const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     }
 
     return sessionId ? (
-        <MindMapContext.Provider value={{ sessionId, addChatNodePair }}>
+        <MindMapContext.Provider value={{ sessionId, addChatNodePair, nodes: nodes.current, lastNodeOnDom: lastNodeOnDomRef.current }}>
             {children}
         </MindMapContext.Provider>
     ) : (

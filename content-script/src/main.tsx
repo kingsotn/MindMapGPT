@@ -5,6 +5,8 @@ import App from "./App";
 import ConversationObserver from "./ConversationObserver";
 import { SessionProvider } from "./SessionProvider";
 import MindMapProvider from "./MindMapProvider";
+import OverviewFlow from "./OverviewFlow";
+
 
 const appRootId = "react-app-root";
 let appRootElem = document.getElementById(appRootId);
@@ -21,6 +23,7 @@ if (appRootElem) {
             <SessionProvider>
                 {/* Nest MindMapProvider inside SessionProvider */}
                 <MindMapProvider>
+
                     {/* Components that use MindMap context should be here */}
                     <ConversationObserver />
                     <App />
