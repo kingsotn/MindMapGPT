@@ -1,6 +1,8 @@
 # FLOW
 
-Sam Altman said that chatgpt is a (brainstorming tool)[https://youtu.be/jvqFAi7vkBc?si=W-Guv57vhzGdO4yc&t=3140]. Let's make it a great workflow start
+https://github.com/kingsotn/flow2/assets/36507785/8cc85106-967d-429f-8dfa-26c696ae8d9b
+
+Sam Altman said that chatgpt is a (brainstorming tool)[https://youtu.be/jvqFAi7vkBc?si=W-Guv57vhzGdO4yc&t=3140]. Let's make it a reality.
 
 ## Run
 
