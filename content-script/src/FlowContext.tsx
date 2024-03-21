@@ -1,5 +1,5 @@
-import React, { createContext, useContext, ReactNode, useCallback } from 'react';
-import { addEdge, Node, Edge, Connection, OnNodesChange, OnEdgesChange, useNodesState, useEdgesState } from 'reactflow';
+import React, { createContext, useContext, useCallback } from 'react';
+import ReactFlow, { addEdge, Node, Edge, Connection, OnNodesChange, OnEdgesChange, useNodesState, useEdgesState, ReactFlowProvider } from 'reactflow';
 import { ChatNodePair } from './MindMapProvider';
 import { initFlowEdges, initFlowNodes } from './initialData';
 import { ChatNodePairUi } from './initialData';
@@ -13,13 +13,15 @@ interface FlowContextValue {
     setFlowEdges: (flowEdges: Edge[]) => void;
     onEdgesChange: OnEdgesChange;
     onConnect: (connection: Connection) => void;
+    addNodeToFlowUi: (node: ChatNodePairUi) => void;
 }
 
-interface FlowProviderProps {
-    children: ReactNode;
-    initialNodes: ChatNodePairUi[];
-    initialEdges: Edge[];
-}
+
+// interface FlowProviderProps {
+//     children: ReactNode;
+//     initialNodes: ChatNodePairUi[];
+//     initialEdges: Edge[];
+// }
 
 const FlowContext = createContext<FlowContextValue | undefined>(undefined);
 
@@ -31,13 +33,36 @@ export const useFlow = (): FlowContextValue => {
     return context;
 };
 
-export const FlowProvider: React.FC<FlowProviderProps> = ({ children, initialNodes, initialEdges }) => {
+
+export const FlowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(initFlowNodes);
     const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(initFlowEdges);
 
     const onConnect = useCallback((connection: Connection) => setFlowEdges((eds) => addEdge(connection, eds)), [setFlowEdges]);
 
-    const value: FlowContextValue = { flowNodes, setFlowNodes, onNodesChange, flowEdges, setFlowEdges, onEdgesChange, onConnect };
+    const addNodeToFlowUi = useCallback((node: ChatNodePairUi) => {
+        console.log(">>> Inside addNodeToFlowUi with", node)
+        setFlowNodes((prevNodes) => [...prevNodes, node]);
+    }, [setFlowNodes]);
 
-    return <FlowContext.Provider value={value}>{children}</FlowContext.Provider>;
+    const value: FlowContextValue = {
+        flowNodes,
+        setFlowNodes,
+        onNodesChange,
+        flowEdges,
+        setFlowEdges,
+        onEdgesChange,
+        onConnect,
+        addNodeToFlowUi
+    };
+
+    return (
+        <FlowContext.Provider value={value}>
+            <ReactFlowProvider>
+                {children}
+            </ReactFlowProvider>
+        </FlowContext.Provider>
+    );
 };
+
+export default FlowProvider

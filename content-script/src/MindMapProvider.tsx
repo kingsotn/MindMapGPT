@@ -4,9 +4,29 @@
 // State Management: Uses refs or state hooks (e.g., useState, useRef) to keep track of the current state. When the state updates, it should provide the new state to through the context.
 // UI Updates Trigger: When addChatNodePair is called, and a new node is successfully added, it updates the mind map's state. This change in state (or refs, if you're using them to track mutable data without causing re-renders) should be propagated through the context to any consuming components.
 
-import React, { createContext, useContext, useState, useRef } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { useSession } from './SessionProvider';
-// import { updateMindMapUI } from './ReactFlowUI';
+import { useFlow } from './FlowContext';
+
+import ReactFlow, {
+    addEdge,
+    FitViewOptions,
+    applyNodeChanges,
+    applyEdgeChanges,
+    Node,
+    Edge,
+    OnNodesChange,
+    OnEdgesChange,
+    OnConnect,
+    DefaultEdgeOptions,
+    NodeTypes,
+    ReactFlowInstance,
+    useReactFlow,
+    useNodesState,
+    useEdgesState,
+} from 'reactflow';
+
+import { defaultSystem, defaultHead, ChatNodePairUi } from './initialData';
 
 
 type Role = "User" | "Assistant" | "System";
@@ -30,24 +50,8 @@ export interface ChatNodePair {
     parent?: ChatNodePair | null; // Optional reference to the parent node
 }
 
-const defaultSystem: ChatNodePair = {
-    uuid: 'systemChatNode',
-    // content: // TODO: this can actually be parsed down the future (system msg)
-    parent: null, // The parent of defaultSystem is null initially
-    children: new Map<string, ChatNodePair>(),
-};
-
-const defaultHead: ChatNodePair = {
-    uuid: 'headChatNode',
-    children: new Map<string, ChatNodePair>([[defaultSystem.uuid, defaultSystem]]),
-    // Assign defaultSystem as a child of defaultHead
-};
-
-// Assign defaultHead as the parent of defaultSystem
-defaultSystem.parent = defaultHead;
-
 // Default context value incorporating the head root
-const defaultMindMapContextValue = {
+export const defaultMindMapContextValue = {
     sessionId: '', // Assuming an empty string or some initial value
     nodes: new Map([[defaultSystem.uuid, defaultSystem]]),
     addChatNodePair: (node: ChatNodePair) => { }, // Stub function, since we can't add nodes without the provider
@@ -59,9 +63,10 @@ const MindMapContext = createContext(defaultMindMapContextValue);
 
 const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { sessionId } = useSession();
+    const { addNodeToFlowUi } = useFlow();
     const nodes = useRef<Map<string, ChatNodePair>>(new Map([[defaultHead.uuid, defaultHead], [defaultSystem.uuid, defaultSystem]]));
     const lastNodeOnDomRef = useRef<ChatNodePair>(defaultSystem);
-
+    const { flowNodes, setFlowNodes, onNodesChange, flowEdges, setFlowEdges, onEdgesChange, onConnect } = useFlow();
 
     const addChatNodePair = (node: ChatNodePair) => {
         // Access the current value of the nodes ref
@@ -86,12 +91,18 @@ const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         // Update the lastNodeOnDom ref
         lastNodeOnDomRef.current = node;
         console.log("lastNodeOnDom", lastNodeOnDomRef.current.uuid.slice(-14));
-
         console.log(`MindMap (${sessionId}):`);
 
-        // update the UI
-        // updateMindMapUI();
+        const newFlowNode: ChatNodePairUi = {
+            id: node.uuid,
+            data: node,
+            position: { x: 250, y: 200 },
+        };
+
+        console.log("calling addNodeToFlowUi")
+        addNodeToFlowUi(newFlowNode);
     };
+
 
     const printMindMap = () => {
         console.log(defaultHead.children.forEach((np) => { console.log(np.children) }));

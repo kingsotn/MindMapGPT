@@ -5,8 +5,8 @@ import App from "./App";
 import ConversationObserver from "./ConversationObserver";
 import { SessionProvider } from "./SessionProvider";
 import MindMapProvider from "./MindMapProvider";
-import OverviewFlow from "./OverviewFlow";
-
+import { initFlowEdges, initFlowNodes } from "./initialData";
+import { FlowProvider } from "./FlowContext";
 
 const appRootId = "react-app-root";
 let appRootElem = document.getElementById(appRootId);
@@ -21,13 +21,12 @@ if (appRootElem) {
     root.render(
         <React.StrictMode>
             <SessionProvider>
-                {/* Nest MindMapProvider inside SessionProvider */}
-                <MindMapProvider>
-
-                    {/* Components that use MindMap context should be here */}
-                    <ConversationObserver />
-                    <App />
-                </MindMapProvider>
+                <FlowProvider initialNodes={initFlowNodes} initialEdges={initFlowEdges}>
+                    <MindMapProvider>
+                        <ConversationObserver />
+                        <App />
+                    </MindMapProvider>
+                </FlowProvider>
             </SessionProvider>
         </React.StrictMode>,
     );

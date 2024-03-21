@@ -1,46 +1,26 @@
-import React, { memo } from 'react';
-import ReactFlow, {
-    addEdge,
-    FitViewOptions,
-    applyNodeChanges,
-    applyEdgeChanges,
-    Node,
-    Edge,
-    OnNodesChange,
-    OnEdgesChange,
-    OnConnect,
-    DefaultEdgeOptions,
-    NodeTypes,
-    ReactFlowInstance,
-    useNodesState,
-    useEdgesState,
-    Position,
-    Handle
-} from 'reactflow';
+// don't need this for now
 
-import { ChatNodePair } from './MindMapProvider';
 
-type CustomNodeProps = {
-    id: string;
-    data: ChatNodePair;
-};
+// import React, { useCallback } from 'react';
+// import { Handle, Position } from 'reactflow';
 
-type CustomNode = Node<ChatNodePair>;
+// // @ts-ignore
+// const ChatNodePairUi = ({ data }) => {
+//     // Example interaction handler (adjust based on your needs)
+//     const onEdit = useCallback(() => {
+//         console.log('Editing Node:', data.uuid);
+//         // Place logic here for editing the node, e.g., displaying a modal with details
+//     }, [data.uuid]);
 
-const CustomNode: React.FC<CustomNodeProps> = ({ id, data }) => {
-    return (
-        <div className="custom-node">
-            <Handle type="target" position={Position.Top} />
-            <div className="custom-node__header">Custom Node: {data.uuid}</div>
-            <div className="custom-node__body">
-                {/* Example of listing children UUIDs */}
-                {Array.from(data.children.values()).map((child, index) => (
-                    <div key={index}>Child UUID: {child.uuid}</div>
-                ))}
-            </div>
-            <Handle type="source" position={Position.Bottom} />
-        </div>
-    );
-};
+//     return (
+//         <>
+//             <Handle type="target" position={Position.Top} />
+//             <div onDoubleClick={onEdit} className="nodrag chat-node-pair-ui">
+//                 <strong>{data.uuid}</strong>
+//                 {/* Display additional data as needed */}
+//             </div>
+//             <Handle type="source" position={Position.Bottom} />
+//         </>
+//     );
+// };
 
-export default memo(CustomNode);
