@@ -7,7 +7,10 @@ import { useSession } from "./SessionProvider";
 
 // import FlowApp from "./FlowApp";
 // import { FlowProvider } from "./FlowContext";
-import { initFlowEdges, initFlowNodes } from "./initialData";
+import { initialEdges, initialNodes } from "./initialData";
+// import FlowProvider from "./ProviderFlow";
+import ReactFlowWrapper from "./FlowApp";
+import './index.css';
 
 // TODO sessionId is a useState to fix the window sizing
 
@@ -78,12 +81,17 @@ function App() {
 	return (
 		<div style={appStyle}>
 			<div className="App">
+
 				<header className="App-header" style={{ height: '100vh', width: '100%' }}>
+					<ReactFlowWrapper />
+
+
+					{/* <FlowProvider /> */}
 					{/* <FlowApp /> */}
 					{/* <ToggleGroupDemo />
-						<Logo className="App-logo" id="App-logo" title="React logo" />
-						<p className="App-title"> Flow: A mind map for ChatGPT</p> */}
-					{/* <CustomNodeFlow appWidth={appWidth} /> */}
+					<Logo className="App-logo" id="App-logo" title="React logo" />
+					<p className="App-title"> Flow: A mind map for ChatGPT</p> */}
+					{/* {/* <CustomNodeFlow appWidth={appWidth} /> */}
 
 				</header>
 			</div>

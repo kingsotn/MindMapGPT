@@ -6,25 +6,7 @@
 
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { useSession } from './SessionProvider';
-import { useFlow } from './FlowContext';
-
-import ReactFlow, {
-    addEdge,
-    FitViewOptions,
-    applyNodeChanges,
-    applyEdgeChanges,
-    Node,
-    Edge,
-    OnNodesChange,
-    OnEdgesChange,
-    OnConnect,
-    DefaultEdgeOptions,
-    NodeTypes,
-    ReactFlowInstance,
-    useReactFlow,
-    useNodesState,
-    useEdgesState,
-} from 'reactflow';
+// import { useFlow } from './FlowContext';
 
 import { defaultSystem, defaultHead, ChatNodePairUi } from './initialData';
 
@@ -44,18 +26,30 @@ export interface ChatNodePair {
     uuid: string; // just use the User's uuid
     userNode?: ChatNode
     assistantNode?: ChatNode
+    label?: string,
 
     // set
     children: Map<string, ChatNodePair>; // {uuid : ChatNodePair...}
     parent?: ChatNodePair | null; // Optional reference to the parent node
 }
 
+export interface MindMapContextType {
+    sessionId: string;
+    nodes: Map<string, ChatNodePair>;
+    addChatNodePair: (node: ChatNodePair) => void;
+    lastNodeOnDom: ChatNodePair;
+    toAddNode: ChatNodePair | null; // Adjusted to allow ChatNodePair or null
+    setToAddNode: (node: ChatNodePair | null) => void; // Ensure setter accepts ChatNodePair | null
+}
+
 // Default context value incorporating the head root
-export const defaultMindMapContextValue = {
+export const defaultMindMapContextValue: MindMapContextType = {
     sessionId: '', // Assuming an empty string or some initial value
     nodes: new Map([[defaultSystem.uuid, defaultSystem]]),
     addChatNodePair: (node: ChatNodePair) => { }, // Stub function, since we can't add nodes without the provider
     lastNodeOnDom: defaultSystem,
+    toAddNode: null,
+    setToAddNode: () => { },
 };
 
 // Creating the context with the default value
@@ -63,10 +57,11 @@ const MindMapContext = createContext(defaultMindMapContextValue);
 
 const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { sessionId } = useSession();
-    const { addNodeToFlowUi } = useFlow();
+    // const { addChildNode } = useFlow();
     const nodes = useRef<Map<string, ChatNodePair>>(new Map([[defaultHead.uuid, defaultHead], [defaultSystem.uuid, defaultSystem]]));
     const lastNodeOnDomRef = useRef<ChatNodePair>(defaultSystem);
-    const { flowNodes, setFlowNodes, onNodesChange, flowEdges, setFlowEdges, onEdgesChange, onConnect } = useFlow();
+    const [toAddNode, setToAddNode] = useState<ChatNodePair | null>(null);
+    // const { flowNodes, SetNodes, onNodesChange, flowEdges, SetEdges, onEdgesChange, onConnect } = useFlow();
 
     const addChatNodePair = (node: ChatNodePair) => {
         // Access the current value of the nodes ref
@@ -79,6 +74,8 @@ const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
             console.error(`Parent node not found. This should not happen.`);
             return; // Return if the parent isn't found
         }
+
+        setToAddNode(node);
 
         // Link the new node to its parent and vice versa
         node.parent = parentNode;
@@ -93,14 +90,7 @@ const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         console.log("lastNodeOnDom", lastNodeOnDomRef.current.uuid.slice(-14));
         console.log(`MindMap (${sessionId}):`);
 
-        const newFlowNode: ChatNodePairUi = {
-            id: node.uuid,
-            data: node,
-            position: { x: 250, y: 200 },
-        };
-
-        console.log("calling addNodeToFlowUi")
-        addNodeToFlowUi(newFlowNode);
+        console.log("calling addChildNode")
     };
 
 
@@ -109,7 +99,7 @@ const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     }
 
     return sessionId ? (
-        <MindMapContext.Provider value={{ sessionId, addChatNodePair, nodes: nodes.current, lastNodeOnDom: lastNodeOnDomRef.current }}>
+        <MindMapContext.Provider value={{ sessionId, addChatNodePair, toAddNode, setToAddNode, nodes: nodes.current, lastNodeOnDom: lastNodeOnDomRef.current }}>
             {children}
         </MindMapContext.Provider>
     ) : (

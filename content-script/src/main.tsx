@@ -5,9 +5,10 @@ import App from "./App";
 import ConversationObserver from "./ConversationObserver";
 import { SessionProvider } from "./SessionProvider";
 import MindMapProvider from "./MindMapProvider";
-import { initFlowEdges, initFlowNodes } from "./initialData";
-import { FlowProvider } from "./FlowContext";
+// import { ProviderFlow } from "./ProviderFlow";
+import ReactFlowWrapper from "./FlowApp";
 
+import './index.css'
 const appRootId = "react-app-root";
 let appRootElem = document.getElementById(appRootId);
 if (!appRootElem) {
@@ -16,18 +17,20 @@ if (!appRootElem) {
     document.body.appendChild(appRootElem);
 }
 
+
+
 if (appRootElem) {
     const root = createRoot(appRootElem);
     root.render(
         <React.StrictMode>
             <SessionProvider>
-                <FlowProvider initialNodes={initFlowNodes} initialEdges={initFlowEdges}>
-                    <MindMapProvider>
-                        <ConversationObserver />
-                        <App />
-                    </MindMapProvider>
-                </FlowProvider>
+                <MindMapProvider>
+                    <ConversationObserver />
+                    <App />
+                </MindMapProvider>
+                {/* </ProviderFlow> */}
             </SessionProvider>
+
         </React.StrictMode>,
     );
 } else {

@@ -27,27 +27,37 @@ defaultSystem.parent = defaultHead;
 
 // extend reactflow's Node class with a new type
 export interface ChatNodePairUi extends Node {
-    data: ChatNodePair;
+    data: {
+        label: string;
+        ChatNodePair?: ChatNodePair;
+    }
+
 }
 
-export const initFlowNodes: ChatNodePairUi[] = [
+export const initialNodes: ChatNodePairUi[] = [
     {
         id: defaultHead.uuid,
         // type: 'customNode', // Assuming you've registered a custom node type named 'customNode'
-        data: defaultHead,
+        data: {
+            ChatNodePair: defaultHead,
+            label: "head"
+        },
         position: { x: 250, y: 5 },
     },
     {
         id: defaultSystem.uuid,
         // type: 'customNode', // Use the same custom node type for consistency
-        data: defaultSystem,
+        data: {
+            ChatNodePair: defaultSystem,
+            label: "System"
+        },
         position: { x: 250, y: 100 },
     },
 ];
 
-export const initFlowEdges: Edge[] = [
-    { id: 'e-head-system', source: defaultHead.uuid, target: defaultSystem.uuid, animated: true },
+export const initialEdges: Edge[] = [
+    { id: 'headChatNode-systemChatNode', source: defaultHead.uuid, target: defaultSystem.uuid, animated: true },
 ];
 
-export default { initFlowNodes, initFlowEdges, defaultSystem, defaultHead }
+export default { initialNodes, initialEdges, defaultSystem, defaultHead }
 
