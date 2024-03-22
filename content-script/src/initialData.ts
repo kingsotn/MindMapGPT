@@ -56,7 +56,7 @@ export const initialNodes: ChatNodePairUi[] = [
 ];
 
 export const initialEdges: Edge[] = [
-    { id: 'headChatNode-systemChatNode', source: defaultHead.uuid, target: defaultSystem.uuid, animated: true },
+    { id: 'headChatNode-systemChatNode', source: defaultHead.uuid, target: defaultSystem.uuid, animated: true, type: "simplebezier" },
 ];
 
 export default { initialNodes, initialEdges, defaultSystem, defaultHead }

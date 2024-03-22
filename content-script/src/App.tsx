@@ -4,11 +4,7 @@ import ToggleGroupDemo from "./ToggleGroup";
 import "./App.css";
 
 import { useSession } from "./SessionProvider";
-
-// import FlowApp from "./FlowApp";
-// import { FlowProvider } from "./FlowContext";
 import { initialEdges, initialNodes } from "./initialData";
-// import FlowProvider from "./ProviderFlow";
 import ReactFlowWrapper from "./FlowApp";
 import './index.css';
 

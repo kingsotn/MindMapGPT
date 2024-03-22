@@ -4,7 +4,7 @@
 // State Management: Uses refs or state hooks (e.g., useState, useRef) to keep track of the current state. When the state updates, it should provide the new state to through the context.
 // UI Updates Trigger: When addChatNodePair is called, and a new node is successfully added, it updates the mind map's state. This change in state (or refs, if you're using them to track mutable data without causing re-renders) should be propagated through the context to any consuming components.
 
-import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
 import { useSession } from './SessionProvider';
 // import { useFlow } from './FlowContext';
 
@@ -36,6 +36,7 @@ export interface ChatNodePair {
 export interface MindMapContextType {
     sessionId: string;
     nodes: Map<string, ChatNodePair>;
+    updateLastNodeOnDomRef: (node: ChatNodePair) => void;
     addChatNodePair: (node: ChatNodePair) => void;
     lastNodeOnDom: ChatNodePair;
     toAddNode: ChatNodePair | null; // Adjusted to allow ChatNodePair or null
@@ -46,6 +47,7 @@ export interface MindMapContextType {
 export const defaultMindMapContextValue: MindMapContextType = {
     sessionId: '', // Assuming an empty string or some initial value
     nodes: new Map([[defaultSystem.uuid, defaultSystem]]),
+    updateLastNodeOnDomRef: () => { },
     addChatNodePair: (node: ChatNodePair) => { }, // Stub function, since we can't add nodes without the provider
     lastNodeOnDom: defaultSystem,
     toAddNode: null,
@@ -86,7 +88,7 @@ const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         nodes.current = updatedNodes;
 
         // Update the lastNodeOnDom ref
-        lastNodeOnDomRef.current = node;
+        // lastNodeOnDomRef.current = node;
         console.log("lastNodeOnDom", lastNodeOnDomRef.current.uuid.slice(-14));
         console.log(`MindMap (${sessionId}):`);
 
@@ -98,8 +100,12 @@ const MindMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         console.log(defaultHead.children.forEach((np) => { console.log(np.children) }));
     }
 
+    const updateLastNodeOnDomRef = useCallback((newNode: ChatNodePair) => {
+        lastNodeOnDomRef.current = newNode;
+    }, []);
+
     return sessionId ? (
-        <MindMapContext.Provider value={{ sessionId, addChatNodePair, toAddNode, setToAddNode, nodes: nodes.current, lastNodeOnDom: lastNodeOnDomRef.current }}>
+        <MindMapContext.Provider value={{ sessionId, addChatNodePair, toAddNode, setToAddNode, updateLastNodeOnDomRef, nodes: nodes.current, lastNodeOnDom: lastNodeOnDomRef.current }}>
             {children}
         </MindMapContext.Provider>
     ) : (

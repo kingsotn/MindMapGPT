@@ -16,6 +16,7 @@
         "@radix-ui/react-toggle-group": "^1.0.4",
         "d3-hierarchy": "3.1.2",
         "elkjs": "^0.9.2",
+        "leva": "0.9.35",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "reactflow": "^11.10.4",

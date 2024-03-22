@@ -5,8 +5,6 @@ import App from "./App";
 import ConversationObserver from "./ConversationObserver";
 import { SessionProvider } from "./SessionProvider";
 import MindMapProvider from "./MindMapProvider";
-// import { ProviderFlow } from "./ProviderFlow";
-import ReactFlowWrapper from "./FlowApp";
 
 import './index.css'
 const appRootId = "react-app-root";
@@ -28,9 +26,7 @@ if (appRootElem) {
                     <ConversationObserver />
                     <App />
                 </MindMapProvider>
-                {/* </ProviderFlow> */}
             </SessionProvider>
-
         </React.StrictMode>,
     );
 } else {

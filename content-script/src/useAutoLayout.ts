@@ -1,4 +1,3 @@
-//https://pro.reactflow.dev/examples/react/auto-layout
 import { useEffect } from 'react';
 import {
     type Node,
@@ -9,7 +8,7 @@ import {
 } from 'reactflow';
 
 import { getSourceHandlePosition, getTargetHandlePosition } from './utils';
-import layoutAlgorithms, { type LayoutAlgorithmOptions } from './algorithms/';
+import layoutAlgorithms, { type LayoutAlgorithmOptions } from './algorithms';
 
 export type LayoutOptions = {
     algorithm: keyof typeof layoutAlgorithms;
