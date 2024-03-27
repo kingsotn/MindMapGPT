@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef, createContext, useContext } from 'react';
 import { useSession } from './SessionProvider';
 import MindMapProvider, { useMindMap, ChatNode, ChatNodePair } from './MindMapProvider';
-
+import { ReactFlowAutoLayout } from './FlowApp';
 
 const ConversationObserver: React.FC<{}> = () => {
     const { sessionId } = useSession();
     const observerRef = useRef<MutationObserver | null>(null);
     const { addChatNodePair } = useMindMap();
+    const mutationSessionIdRef = useRef(sessionId);
 
     useEffect(() => {
         const isElementNode = (node: Node): node is HTMLElement => node.nodeType === Node.ELEMENT_NODE;
@@ -72,8 +73,22 @@ const ConversationObserver: React.FC<{}> = () => {
         }
 
         const setupObserver = () => {
-            waitForDomLoad('.flex.flex-col.text-sm.pb-9', 1000, (chatBody) => {
-                if (observerRef.current) return; // Exit if observer is already set up
+            const chatBlockSelector = '.flex.flex-col.text-sm.pb-9'
+            waitForDomLoad(chatBlockSelector, 1000, (chatBody) => {
+
+
+                // if user switches chats
+                if (mutationSessionIdRef.current !== sessionId) {
+                    // !! TODO. figure this out.... idk how to init a new reactflow layout.
+                    // console.log("sess aint the same!", mutationSessionIdRef.current, sessionId);
+                    // ReactFlowAutoLayout();
+
+                    console.log("set new Id");
+                    mutationSessionIdRef.current = sessionId;
+                }
+
+                // Assuming observerRef is properly initialized and accessible here
+                if (observerRef.current) return;
 
                 console.log("Setting up observer on:", chatBody);
 
@@ -82,10 +97,9 @@ const ConversationObserver: React.FC<{}> = () => {
                         uuid: "",
                         userNode: {} as ChatNode,
                         assistantNode: {} as ChatNode,
-                        children: new Map<string, ChatNodePair>
+                        children: new Map()
                     };
 
-                    // Filter mutations for Assistant and User Chats
                     const relevantMutations = mutationsList.filter(mutation =>
                         mutation.type === 'childList' &&
                         mutation.addedNodes.length > 0 &&
@@ -93,7 +107,6 @@ const ConversationObserver: React.FC<{}> = () => {
                         mutation.target.querySelector('.flex-col.gap-1.md\\:gap-3')
                     );
 
-                    // Only call handleMutations if there are relevant mutations
                     if (relevantMutations.length > 0) {
                         handleMutations(relevantMutations, chatNodePair);
                     }
@@ -103,8 +116,9 @@ const ConversationObserver: React.FC<{}> = () => {
                 observerRef.current.observe(chatBody, { childList: true, subtree: true });
             });
         };
-
         const handleMutations = (mutationsList: MutationRecord[], chatNodePair: ChatNodePair) => {
+            console.log("found mutation")
+
             // Flag to check if chatNodePair is updated to decide on calling addChatNodePair
             let isChatNodePairUpdated = false;
 
@@ -141,8 +155,8 @@ const ConversationObserver: React.FC<{}> = () => {
             }
         };
 
-
         setupObserver();
+        console.log("sesh", sessionId)
 
         // Cleanup function
         return () => {
@@ -153,6 +167,7 @@ const ConversationObserver: React.FC<{}> = () => {
             }
         };
     }, [sessionId]); // Dependency on sessionId to reset observer if it changes
+
 
     return null; // This component does not render anything
 };

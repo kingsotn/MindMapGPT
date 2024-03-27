@@ -27,12 +27,17 @@ const defaultEdgeOptions = {
     pathOptions: { offset: 5 },
 };
 
-function ReactFlowAutoLayout() {
+// const nodeTypes: NodeTypes = {
+//     shape: ShapeNode,
+// };
+
+export function ReactFlowAutoLayout() {
     console.log("calling ReactFlowAutoLayout")
 
     const { fitView, addNodes } = useReactFlow();
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
     // this hook handles the computation of the layout once the elements or the direction changes
 
     const layoutOptions = useControls({
@@ -54,7 +59,7 @@ function ReactFlowAutoLayout() {
                 left: 'RL',
             } as Record<string, LayoutOptions['direction']>,
         },
-        spacing: [20, 50],
+        spacing: [80, 10],
         // 'add root node': button(() =>
         //     addNodes({
         //         id: "1",
@@ -116,13 +121,6 @@ function ReactFlowAutoLayout() {
         })
 
         mindMapInfo.updateLastNodeOnDomRef(node);
-        // addEdge({
-        //     id: `${node.parent.uuid}->${node.uuid}`,
-        //     source: node.parent.uuid, // Assuming node.parent is a string. If node.parent is an object, adjust accordingly.
-        //     target: node.uuid,
-        //     // style: { opacity: 0 },
-        //     animated: true,
-        // }, edges)
 
         setNodes((currentNodes) => currentNodes.concat([childNode]));
         setEdges((currentEdges) => currentEdges.concat([connectingEdge]));

@@ -13,6 +13,7 @@ if (!appRootElem) {
     appRootElem = document.createElement("div");
     appRootElem.id = appRootId;
     document.body.appendChild(appRootElem);
+    console.log("creating")
 }
 
 

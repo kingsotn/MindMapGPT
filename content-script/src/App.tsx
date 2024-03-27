@@ -12,7 +12,7 @@ import './index.css';
 
 function App() {
 	const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth * 0.75);
-	const [showApp, setShowApp] = useState<boolean>(false);
+	const [showApp, setShowApp] = useState<boolean>(true);
 	const [appWidth, setAppWidth] = useState<number>(window.innerWidth * 0.25)
 	const { sessionId } = useSession();
 
@@ -60,10 +60,6 @@ function App() {
 			window.removeEventListener("resize", handleResize);
 		};
 	}, [windowWidth, sessionId]); // Dependencies
-
-	if (!showApp) {
-		return null; // Or return an alternative UI
-	}
 
 	const appStyle: React.CSSProperties = {
 		position: "fixed",
