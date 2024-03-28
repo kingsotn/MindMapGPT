@@ -21,6 +21,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     console.log("loc", location)
     const [sessionId, setSessionId] = useState<string>(location.href);
 
+
+
     useEffect(() => {
         console.log("new href", location.href)
         const checkSessionId = () => {

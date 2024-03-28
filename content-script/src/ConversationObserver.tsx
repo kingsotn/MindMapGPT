@@ -3,60 +3,63 @@ import { useSession } from './SessionProvider';
 import MindMapProvider, { useMindMap, ChatNode, ChatNodePair } from './MindMapProvider';
 import { ReactFlowAutoLayout } from './FlowApp';
 
+const isElementNode = (node: Node): node is HTMLElement => node.nodeType === Node.ELEMENT_NODE;
+
+const hasRequiredClasses = (element: Element): boolean =>
+    element.classList.contains('w-full') && element.classList.contains('text-token-text-primary');
+
+const getTurnNumber = (element: Element): number | null => {
+    const dataTestId = element.getAttribute('data-testid');
+    const match = dataTestId?.match(/conversation-turn-(\d+)/);
+    return match ? parseInt(match[1], 10) : null;
+};
+
+const parseDomToChatNode = (turnNumber: number, messageDiv: Element): ChatNode => {
+    // console.log("parsing")
+    if (!messageDiv) throw "div is null";
+
+    const uuid = messageDiv.querySelector('[data-message-id]')?.getAttribute('data-message-id');
+    const conversationTurnString = messageDiv.closest('[data-testid]')?.getAttribute('data-testid');
+    const conversationTurn = conversationTurnString
+        ? parseInt(conversationTurnString.match(/\d+$/)?.[0] ?? '0', 10)
+        : null;
+    let content =
+        messageDiv.querySelector('[data-message-author-role="assistant"][data-message-id="17700b54-fa5a-46da-8caf-8dc71f7fe8e3"] .markdown p') ||
+        messageDiv.querySelector('.markdown')?.textContent ||
+        '';
+
+    if (uuid === undefined || uuid === null) {
+        throw new Error('UUID is null or undefined');
+    }
+
+    if (conversationTurnString === null) {
+        throw new Error('conversationTurnString is null');
+    }
+
+    if (content === null) {
+        throw new Error('Content is null');
+    }
+
+    console.log(isEven(turnNumber) ? "Assistant" : "User", uuid.slice(-14), conversationTurn, content);
+    return {
+        uuid: uuid || '',
+        conversationTurn: conversationTurn || 0,
+        role: isEven(turnNumber) ? "User" : "Assistant",
+        content: content as string, // Ensure this is a string or handled accordingly
+    };
+}
+
+const isEven = (num: number): boolean => num % 2 === 0;
+
 const ConversationObserver: React.FC<{}> = () => {
     const { sessionId } = useSession();
     const observerRef = useRef<MutationObserver | null>(null);
     const { addChatNodePair } = useMindMap();
     const mutationSessionIdRef = useRef(sessionId);
+    const lastTurnNumberOnDomRef = useRef<number>(0);
 
     useEffect(() => {
-        const isElementNode = (node: Node): node is HTMLElement => node.nodeType === Node.ELEMENT_NODE;
 
-        const hasRequiredClasses = (element: Element): boolean =>
-            element.classList.contains('w-full') && element.classList.contains('text-token-text-primary');
-
-        const getTurnNumber = (element: Element): number | null => {
-            const dataTestId = element.getAttribute('data-testid');
-            const match = dataTestId?.match(/conversation-turn-(\d+)/);
-            return match ? parseInt(match[1], 10) : null;
-        };
-
-        const parseDomToChatNode = (turnNumber: number, messageDiv: Element): ChatNode => {
-            // console.log("parsing")
-            if (!messageDiv) throw "div is null";
-
-            const uuid = messageDiv.querySelector('[data-message-id]')?.getAttribute('data-message-id');
-            const conversationTurnString = messageDiv.closest('[data-testid]')?.getAttribute('data-testid');
-            const conversationTurn = conversationTurnString
-                ? parseInt(conversationTurnString.match(/\d+$/)?.[0] ?? '0', 10)
-                : null;
-            let content =
-                messageDiv.querySelector('[data-message-author-role="assistant"][data-message-id="17700b54-fa5a-46da-8caf-8dc71f7fe8e3"] .markdown p') ||
-                messageDiv.querySelector('.markdown')?.textContent ||
-                '';
-
-            if (uuid === undefined || uuid === null) {
-                throw new Error('UUID is null or undefined');
-            }
-
-            if (conversationTurnString === null) {
-                throw new Error('conversationTurnString is null');
-            }
-
-            if (content === null) {
-                throw new Error('Content is null');
-            }
-
-            console.log(isEven(turnNumber) ? "Assistant" : "User", uuid.slice(-14), conversationTurn, content);
-            return {
-                uuid: uuid || '',
-                conversationTurn: conversationTurn || 0,
-                role: isEven(turnNumber) ? "User" : "Assistant",
-                content: content as string, // Ensure this is a string or handled accordingly
-            };
-        }
-
-        const isEven = (num: number): boolean => num % 2 === 0;
 
         function waitForDomLoad(selector: string, interval: number, callback: (element: HTMLElement) => void) {
             let intervalId: NodeJS.Timeout | null = null;
@@ -107,6 +110,7 @@ const ConversationObserver: React.FC<{}> = () => {
                         mutation.target.querySelector('.flex-col.gap-1.md\\:gap-3')
                     );
 
+
                     if (relevantMutations.length > 0) {
                         handleMutations(relevantMutations, chatNodePair);
                     }
@@ -131,6 +135,9 @@ const ConversationObserver: React.FC<{}> = () => {
                     ) {
                         const turnNumber = getTurnNumber(textElement as Element);
                         if (turnNumber !== null) {
+                            // set lastTurnNum
+                            lastTurnNumberOnDomRef.current = turnNumber;
+
                             // Parse the DOM node to create a ChatNode
                             const chatNodeParsed = parseDomToChatNode(turnNumber, textElement);
 
@@ -143,6 +150,8 @@ const ConversationObserver: React.FC<{}> = () => {
                             }
 
                             isChatNodePairUpdated = true;
+                        } else {
+                            console.log("TURN NUMBER IS NULL")
                         }
                     }
                 });
@@ -167,6 +176,49 @@ const ConversationObserver: React.FC<{}> = () => {
             }
         };
     }, [sessionId]); // Dependency on sessionId to reset observer if it changes
+
+
+    // figure out how many i have
+
+    function onEditButtonClick() {
+        console.log('Edit button was clicked.');
+        // set the current lastNodeOnDom
+    }
+
+    let chatNodeMap = new Map<string, ChatNode>(); // uuid : ChatNode
+
+    // Get all button dom refs and check if they have been clicked, starts at 2 and every 2 is editable
+    function parseCurrentChatBody() {
+        getChatCount()
+        for (let turnNum = 2; turnNum <= lastTurnNumberOnDomRef.current; turnNum++) {
+            const textElement = document.querySelector(`#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div > div > div:nth-child(${turnNum})`)
+            const generalEditButton = document.querySelector(`#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div > div > div:nth-child(${turnNum}) > div > div > div.relative.flex.w-full.flex-col > div.flex-col.gap-1.md\\:gap-3 > div.mt-1.flex.justify-start.gap-3.empty\\:hidden > div > button`)
+
+            if (textElement) {
+                console.log("Parsing Dom To Chat node in parseCurrentChatBody()")
+                parseDomToChatNode(turnNum, textElement)
+            }
+            if (generalEditButton) {
+                console.log(`button on ${turnNum}`)
+                generalEditButton.addEventListener('click', onEditButtonClick);
+            }
+        }
+    }
+
+    function getChatCount() {
+        const chatBody = document.querySelector("#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div > div")
+        // "if chatBody exists"
+        if (!!chatBody) {
+            // Assuming each turn is a 'div' directly under 'chatBody'
+            const turns = chatBody.querySelectorAll(":scope > div");
+            console.log(`Total conversation turns: ${turns.length}`);
+            lastTurnNumberOnDomRef.current = turns.length
+        } else {
+            console.log("Chat body not found.");
+        }
+    }
+
+    parseCurrentChatBody();
 
 
     return null; // This component does not render anything
